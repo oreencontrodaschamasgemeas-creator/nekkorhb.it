@@ -3,6 +3,8 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@ne
 import { NotificationsService } from './notifications.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Scopes } from '../auth/decorators/scopes.decorator';
+import { AuthScope } from '../auth/constants/scopes.constant';
 
 @ApiTags('notifications')
 @Controller('notifications')
@@ -12,6 +14,7 @@ export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @Post()
+  @Scopes(AuthScope.NOTIFICATIONS_WRITE)
   @ApiOperation({ summary: 'Create a new notification' })
   @ApiResponse({ status: 201, description: 'Notification created successfully' })
   create(@Body() createNotificationDto: CreateNotificationDto) {
@@ -19,6 +22,7 @@ export class NotificationsController {
   }
 
   @Get()
+  @Scopes(AuthScope.NOTIFICATIONS_READ)
   @ApiOperation({ summary: 'Get all notifications' })
   @ApiResponse({ status: 200, description: 'List of all notifications' })
   findAll() {
@@ -26,6 +30,7 @@ export class NotificationsController {
   }
 
   @Get('user')
+  @Scopes(AuthScope.NOTIFICATIONS_READ)
   @ApiOperation({ summary: 'Get notifications by user ID' })
   @ApiResponse({ status: 200, description: 'List of user notifications' })
   @ApiQuery({ name: 'userId', required: true, type: String })
