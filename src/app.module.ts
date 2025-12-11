@@ -11,6 +11,7 @@ import { IncidentsModule } from './modules/incidents/incidents.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { WebsocketModule } from './modules/websocket/websocket.module';
+import { AccessDeviceModule } from './modules/access-device/access-device.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { WebsocketModule } from './modules/websocket/websocket.module';
     NotificationsModule,
     AdminModule,
     WebsocketModule,
+    AccessDeviceModule,
   ],
   controllers: [AppController],
   providers: [AppService],
