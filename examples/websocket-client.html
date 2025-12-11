@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Client Test</title>
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+        }
+        .connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        input, button {
+            padding: 8px 12px;
+            margin: 5px;
+        }
+        #messages {
+            border: 1px solid #ddd;
+            padding: 10px;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 10px 0;
+            background-color: #f9f9f9;
+        }
+        .message {
+            padding: 5px;
+            margin: 5px 0;
+            border-left: 3px solid #007bff;
+            background-color: white;
+        }
+        .message-sent {
+            border-left-color: #28a745;
+        }
+        .message-received {
+            border-left-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WebSocket Client Test</h1>
+        
+        <div id="status" class="status disconnected">Disconnected</div>
+        
+        <div>
+            <h3>Connection</h3>
+            <input type="text" id="serverUrl" value="http://localhost:3000" placeholder="Server URL">
+            <button onclick="connect()">Connect</button>
+            <button onclick="disconnect()">Disconnect</button>
+        </div>
+
+        <div>
+            <h3>Send Message</h3>
+            <input type="text" id="messageInput" placeholder="Enter message" style="width: 300px;">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+
+        <div>
+            <h3>Room Management</h3>
+            <input type="text" id="roomInput" placeholder="Room name" value="devices">
+            <button onclick="subscribeRoom()">Subscribe</button>
+            <button onclick="unsubscribeRoom()">Unsubscribe</button>
+        </div>
+
+        <div>
+            <h3>Messages</h3>
+            <button onclick="clearMessages()">Clear Messages</button>
+            <div id="messages"></div>
+        </div>
+    </div>
+
+    <script>
+        let socket = null;
+
+        function connect() {
+            const serverUrl = document.getElementById('serverUrl').value;
+            
+            socket = io(serverUrl);
+
+            socket.on('connect', () => {
+                updateStatus('Connected', true);
+                addMessage('System', 'Connected to server', 'received');
+            });
+
+            socket.on('disconnect', () => {
+                updateStatus('Disconnected', false);
+                addMessage('System', 'Disconnected from server', 'received');
+            });
+
+            socket.on('message', (data) => {
+                addMessage('Server', JSON.stringify(data), 'received');
+            });
+
+            socket.on('subscribed', (data) => {
+                addMessage('System', `Subscribed to room: ${data.room}`, 'received');
+            });
+
+            socket.on('unsubscribed', (data) => {
+                addMessage('System', `Unsubscribed from room: ${data.room}`, 'received');
+            });
+        }
+
+        function disconnect() {
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+            }
+        }
+
+        function sendMessage() {
+            if (!socket || !socket.connected) {
+                alert('Please connect first');
+                return;
+            }
+
+            const message = document.getElementById('messageInput').value;
+            if (!message) {
+                alert('Please enter a message');
+                return;
+            }
+
+            socket.emit('message', { text: message, timestamp: new Date().toISOString() });
+            addMessage('You', message, 'sent');
+            document.getElementById('messageInput').value = '';
+        }
+
+        function subscribeRoom() {
+            if (!socket || !socket.connected) {
+                alert('Please connect first');
+                return;
+            }
+
+            const room = document.getElementById('roomInput').value;
+            if (!room) {
+                alert('Please enter a room name');
+                return;
+            }
+
+            socket.emit('subscribe', { room });
+            addMessage('You', `Subscribing to room: ${room}`, 'sent');
+        }
+
+        function unsubscribeRoom() {
+            if (!socket || !socket.connected) {
+                alert('Please connect first');
+                return;
+            }
+
+            const room = document.getElementById('roomInput').value;
+            if (!room) {
+                alert('Please enter a room name');
+                return;
+            }
+
+            socket.emit('unsubscribe', { room });
+            addMessage('You', `Unsubscribing from room: ${room}`, 'sent');
+        }
+
+        function updateStatus(text, connected) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = text;
+            statusEl.className = 'status ' + (connected ? 'connected' : 'disconnected');
+        }
+
+        function addMessage(sender, message, type) {
+            const messagesEl = document.getElementById('messages');
+            const messageEl = document.createElement('div');
+            messageEl.className = 'message message-' + type;
+            messageEl.innerHTML = `<strong>${sender}:</strong> ${message} <small>(${new Date().toLocaleTimeString()})</small>`;
+            messagesEl.appendChild(messageEl);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        function clearMessages() {
+            document.getElementById('messages').innerHTML = '';
+        }
+
+        // Enable Enter key for sending messages
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
