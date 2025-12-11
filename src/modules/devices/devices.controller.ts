@@ -4,6 +4,8 @@ import { DevicesService } from './devices.service';
 import { CreateDeviceDto } from './dto/create-device.dto';
 import { UpdateDeviceDto } from './dto/update-device.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Scopes } from '../auth/decorators/scopes.decorator';
+import { AuthScope } from '../auth/constants/scopes.constant';
 
 @ApiTags('devices')
 @Controller('devices')
@@ -13,6 +15,7 @@ export class DevicesController {
   constructor(private readonly devicesService: DevicesService) {}
 
   @Post()
+  @Scopes(AuthScope.DEVICES_WRITE)
   @ApiOperation({ summary: 'Create a new device' })
   @ApiResponse({ status: 201, description: 'Device created successfully' })
   create(@Body() createDeviceDto: CreateDeviceDto) {
@@ -20,6 +23,7 @@ export class DevicesController {
   }
 
   @Get()
+  @Scopes(AuthScope.DEVICES_READ)
   @ApiOperation({ summary: 'Get all devices' })
   @ApiResponse({ status: 200, description: 'List of all devices' })
   findAll() {
@@ -27,6 +31,7 @@ export class DevicesController {
   }
 
   @Get(':id')
+  @Scopes(AuthScope.DEVICES_READ)
   @ApiOperation({ summary: 'Get a device by ID' })
   @ApiResponse({ status: 200, description: 'Device found' })
   @ApiResponse({ status: 404, description: 'Device not found' })
@@ -35,6 +40,7 @@ export class DevicesController {
   }
 
   @Patch(':id')
+  @Scopes(AuthScope.DEVICES_WRITE)
   @ApiOperation({ summary: 'Update a device' })
   @ApiResponse({ status: 200, description: 'Device updated successfully' })
   @ApiResponse({ status: 404, description: 'Device not found' })
@@ -43,6 +49,7 @@ export class DevicesController {
   }
 
   @Delete(':id')
+  @Scopes(AuthScope.DEVICES_WRITE)
   @ApiOperation({ summary: 'Delete a device' })
   @ApiResponse({ status: 200, description: 'Device deleted successfully' })
   @ApiResponse({ status: 404, description: 'Device not found' })
