@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bull';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
@@ -11,6 +12,10 @@ import { IncidentsModule } from './modules/incidents/incidents.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { WebsocketModule } from './modules/websocket/websocket.module';
+import { CctvModule } from './modules/cctv/cctv.module';
+import { RecordingsModule } from './modules/recordings/recordings.module';
+import { SensorsModule } from './modules/sensors/sensors.module';
+import { AlertsModule } from './modules/alerts/alerts.module';
 
 @Module({
   imports: [
@@ -43,6 +48,7 @@ import { WebsocketModule } from './modules/websocket/websocket.module';
       }),
       inject: [ConfigService],
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
     DevicesModule,
     MonitoringModule,
@@ -50,6 +56,10 @@ import { WebsocketModule } from './modules/websocket/websocket.module';
     NotificationsModule,
     AdminModule,
     WebsocketModule,
+    CctvModule,
+    RecordingsModule,
+    SensorsModule,
+    AlertsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
